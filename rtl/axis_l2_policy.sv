@@ -24,7 +24,7 @@ module axis_l2_policy #(
     output reg  [31:0]  frames_malformed
 );
     localparam integer CW = $clog2(MAX_BEATS + 1);
-    localparam [1:0] CAPTURE = 2'd0, FORWARD = 2'd1, DISCARD = 2'd2;
+    localparam [1:0] CAPTURE = 2'd0, FORWARD = 2'd1, DISCARD = 2'd2, LOAD = 2'd3;
     reg [1:0] state;
     reg [63:0] data_ram [0:MAX_BEATS-1];
     reg [7:0]  keep_ram [0:MAX_BEATS-1];
@@ -32,6 +32,9 @@ module axis_l2_policy #(
     reg [CW-1:0] captured;
     reg [CW-1:0] sending;
     reg [CW-1:0] frame_beats;
+    reg [63:0] output_data;
+    reg [7:0] output_keep;
+    reg output_last;
     reg [47:0] frame_dst_mac;
     reg [15:0] frame_ethertype;
     reg [15:0] frame_rule_ethertype;
@@ -53,9 +56,9 @@ module axis_l2_policy #(
 
     assign s_axis_tready = (state != FORWARD);
     assign m_axis_tvalid = (state == FORWARD);
-    assign m_axis_tdata = data_ram[sending];
-    assign m_axis_tkeep = keep_ram[sending];
-    assign m_axis_tlast = last_ram[sending];
+    assign m_axis_tdata = output_data;
+    assign m_axis_tkeep = output_keep;
+    assign m_axis_tlast = output_last;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -63,6 +66,9 @@ module axis_l2_policy #(
             captured <= 0;
             sending <= 0;
             frame_beats <= 0;
+            output_data <= 0;
+            output_keep <= 0;
+            output_last <= 0;
             frame_dst_mac <= 0;
             frame_ethertype <= 0;
             frame_rule_ethertype <= 0;
@@ -107,7 +113,7 @@ module axis_l2_policy #(
                         end else begin
                             frame_beats <= captured + 1'b1;
                             sending <= 0;
-                            state <= FORWARD;
+                            state <= LOAD;
                         end
                     end else if (captured == MAX_BEATS-1) begin
                         state <= DISCARD;
@@ -118,6 +124,12 @@ module axis_l2_policy #(
                         captured <= captured + 1'b1;
                     end
                 end
+                LOAD: begin
+                    output_data <= data_ram[sending];
+                    output_keep <= keep_ram[sending];
+                    output_last <= last_ram[sending];
+                    state <= FORWARD;
+                end
                 FORWARD: if (m_axis_tready) begin
                     if (sending == frame_beats - 1'b1) begin
                         sending <= 0;
@@ -126,6 +138,9 @@ module axis_l2_policy #(
                         frames_forwarded <= frames_forwarded + 1;
                     end else begin
                         sending <= sending + 1'b1;
+                        output_data <= data_ram[sending + 1'b1];
+                        output_keep <= keep_ram[sending + 1'b1];
+                        output_last <= last_ram[sending + 1'b1];
                     end
                 end
                 DISCARD: if (s_axis_tvalid && s_axis_tlast) begin
