@@ -1,14 +1,16 @@
 # Verification record
 
-Status: Awaiting the first hosted RTL regression.
+Date: 04 November 2026
+Source revision tested: `0bd3540495f4c2b2e8a3cf3d9293fcfb251572d8`
+Hosted regression: https://github.com/vrctsssundaram/Project-Repo-1/actions/runs/41868645596
 
-| Metric | Result |
+| Measurement | Recorded result |
 |---|---|
-| Source compile | Pending |
-| Self-checking simulation | Pending |
-| Synthesis | Not run |
-| Static timing | Not run |
-| FPGA resources | Not measured |
-| Hardware throughput | Not measured |
+| SystemVerilog compilation | **PASS** (`iverilog -g2012 -Wall`) |
+| Self-checking simulation | **PASS** (`vvp`, exit code 0) |
+| Directed checks | forwarding, backpressure, drop, malformed, oversize, disabled rule |
+| FPGA synthesis / utilization | **Not run** |
+| Static timing / Fmax | **Not measured** |
+| Power and hardware throughput | **Not measured** |
 
-Only measured tool output should replace the pending entries. No waveform screenshots or estimated performance figures are used as verification evidence.
+The recorded checks apply to the named revision and exercise the bounded first implementation. No waveform image, fabricated timing report or estimated resource figure is presented as measured evidence.
