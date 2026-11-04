@@ -44,6 +44,9 @@ module axis_l2_policy #(
     reg frame_rule_enable;
     reg frame_match_dst;
     reg frame_match_ethertype;
+    wire read_enable = (state == LOAD) ||
+        (state == FORWARD && m_axis_tready && sending != frame_beats - 1'b1);
+    wire [CW-1:0] read_address = (state == LOAD) ? sending : sending + 1'b1;
 
     wire [15:0] this_ethertype = {s_axis_tdata[39:32], s_axis_tdata[47:40]};
     wire header_ok = (captured == 1)
@@ -62,15 +65,21 @@ module axis_l2_policy #(
     assign m_axis_tkeep = output_keep;
     assign m_axis_tlast = output_last;
 
+    // One clocked read port for each frame buffer supports FPGA block RAM.
+    always @(posedge clk) begin
+        if (read_enable) begin
+            output_data <= data_ram[read_address];
+            output_keep <= keep_ram[read_address];
+            output_last <= last_ram[read_address];
+        end
+    end
+
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             state <= CAPTURE;
             captured <= 0;
             sending <= 0;
             frame_beats <= 0;
-            output_data <= 0;
-            output_keep <= 0;
-            output_last <= 0;
             frame_dst_mac <= 0;
             frame_ethertype <= 0;
             frame_rule_ethertype <= 0;
@@ -127,9 +136,6 @@ module axis_l2_policy #(
                     end
                 end
                 LOAD: begin
-                    output_data <= data_ram[sending];
-                    output_keep <= keep_ram[sending];
-                    output_last <= last_ram[sending];
                     state <= FORWARD;
                 end
                 FORWARD: if (m_axis_tready) begin
@@ -140,9 +146,6 @@ module axis_l2_policy #(
                         frames_forwarded <= frames_forwarded + 1;
                     end else begin
                         sending <= sending + 1'b1;
-                        output_data <= data_ram[sending + 1'b1];
-                        output_keep <= keep_ram[sending + 1'b1];
-                        output_last <= last_ram[sending + 1'b1];
                     end
                 end
                 DISCARD: if (s_axis_tvalid && s_axis_tlast) begin
