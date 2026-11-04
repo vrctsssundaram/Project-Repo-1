@@ -47,6 +47,7 @@ module axis_l2_policy #(
     wire read_enable = (state == LOAD) ||
         (state == FORWARD && m_axis_tready && sending != frame_beats - 1'b1);
     wire [CW-1:0] read_address = (state == LOAD) ? sending : sending + 1'b1;
+    wire store_beat = (state == CAPTURE) && s_axis_tvalid;
 
     wire [15:0] this_ethertype = {s_axis_tdata[39:32], s_axis_tdata[47:40]};
     wire header_ok = (captured == 1)
@@ -65,8 +66,13 @@ module axis_l2_policy #(
     assign m_axis_tkeep = output_keep;
     assign m_axis_tlast = output_last;
 
-    // One clocked read port for each frame buffer supports FPGA block RAM.
+    // One synchronous write port and one clocked read port per buffer.
     always @(posedge clk) begin
+        if (store_beat) begin
+            data_ram[captured] <= s_axis_tdata;
+            keep_ram[captured] <= s_axis_tkeep;
+            last_ram[captured] <= s_axis_tlast;
+        end
         if (read_enable) begin
             output_data <= data_ram[read_address];
             output_keep <= keep_ram[read_address];
@@ -96,9 +102,6 @@ module axis_l2_policy #(
         end else begin
             case (state)
                 CAPTURE: if (s_axis_tvalid) begin
-                    data_ram[captured] <= s_axis_tdata;
-                    keep_ram[captured] <= s_axis_tkeep;
-                    last_ram[captured] <= s_axis_tlast;
                     if (captured == 0) begin
                         frame_dst_mac <= s_axis_tdata[47:0];
                         frame_first_full <= &s_axis_tkeep;
