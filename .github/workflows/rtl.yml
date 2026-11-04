@@ -1,0 +1,14 @@
+name: RTL regression
+on:
+  push:
+  pull_request:
+jobs:
+  simulation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install simulation tools
+        run: sudo apt-get update -qq && sudo apt-get install -y iverilog
+      - name: Run self-checking testbench
+        run: make test
