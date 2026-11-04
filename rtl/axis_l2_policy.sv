@@ -54,7 +54,9 @@ module axis_l2_policy #(
         (!frame_match_dst || frame_dst_mac == frame_rule_dst_mac) &&
         (!frame_match_ethertype || checked_ethertype == frame_rule_ethertype);
 
-    assign s_axis_tready = (state != FORWARD);
+    // The LOAD cycle only primes the synchronous read port; it cannot
+    // accept a new input beat until this frame finishes forwarding.
+    assign s_axis_tready = (state == CAPTURE || state == DISCARD);
     assign m_axis_tvalid = (state == FORWARD);
     assign m_axis_tdata = output_data;
     assign m_axis_tkeep = output_keep;

@@ -66,8 +66,10 @@ module tb_axis_l2_policy;
         m_ready = 0;
         send(FIRST, 8'hff, 0);
         send(IPV4, 8'h3f, 1);
+        if (s_ready !== 1'b0)
+            $fatal(1, "Input ready must be low during synchronous-memory LOAD");
         wait_cycles(2);
-        if (!m_valid || m_data !== FIRST || m_last)
+        if (!m_valid || m_data !== FIRST || m_last || s_ready)
             $fatal(1, "Forwarding data not held under backpressure");
         @(negedge clk); m_ready = 1;
         wait_cycles(5);
