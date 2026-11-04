@@ -8,13 +8,14 @@ One clock domain; an input frame is stored into a finite beat memory. The first 
 
 | State | Condition | Next state |
 |---|---|---|
-| CAPTURE | Last beat and valid nonmatching frame | FORWARD |
+| CAPTURE | Last beat and valid nonmatching frame | LOAD |
 | CAPTURE | Last beat and matching/malformed frame | CAPTURE |
 | CAPTURE | Capacity reached before last beat | DISCARD |
+| LOAD | Read the first frame beat from synchronous memory | FORWARD |
 | FORWARD | Final output handshake | CAPTURE |
 | DISCARD | Input last-beat handshake | CAPTURE |
 
-The output remains stable while `m_axis_tvalid=1` and `m_axis_tready=0`. Input is backpressured for the entire forwarding phase.
+The output remains stable while `m_axis_tvalid=1` and `m_axis_tready=0`. Input is backpressured during both LOAD and FORWARD. Storage and replay use one synchronous write port and one synchronous read port per buffer.
 
 ## Limitations
 
