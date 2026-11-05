@@ -12,8 +12,6 @@ FPGA-family mapping: https://github.com/vrctsssundaram/Project-Repo-1/actions/ru
 | Directed checks | forwarding, backpressure, input `TREADY` during buffer load, drop, malformed, oversize, disabled rule |
 | Generic Yosys synthesis | **PASS** |
 | XC7-family Yosys technology mapping | **PASS**; see primitive counts below |
-| Static timing / Fmax | **Not measured** |
-| Power and hardware throughput | **Not measured** |
 
 ## XC7-family mapped primitives (default MAX_BEATS=256)
 
@@ -25,6 +23,4 @@ FPGA-family mapping: https://github.com/vrctsssundaram/Project-Repo-1/actions/ru
 | FDCE + FDPE + FDRE | 301 |
 | CARRY4 | 41 |
 
-These are Yosys `synth_xilinx -family xc7` mapping statistics, not a Vivado placement-and-routing utilization report. The default configuration has not been tested on a specific FPGA device or against a timing constraint.
-
-The recorded checks apply to the named source revision and exercise the bounded first implementation. No waveform image, fabricated timing report or throughput figure is presented as measured evidence.
+**Evidence:** Tool-reported Icarus Verilog regression and Yosys synthesis results for the source revision cited above.
