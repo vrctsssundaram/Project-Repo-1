@@ -17,6 +17,6 @@ make synth-fpga
 
 Design sources are in `rtl/`, directed tests in `tb/`, and interface, architecture, testing and measured results in `docs/`.
 
-**Scope:** A single-frame buffered policy primitive; not a complete Ethernet firewall, MAC, or AXI-Lite peripheral.
+**Architecture:** Single-frame Ethernet II capture, destination MAC/EtherType policy evaluation and AXI4-Stream replay.
 
 Project owner: Sundaram S S.

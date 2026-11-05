@@ -16,6 +16,4 @@
 | `frames_oversize` | Oversize subset of dropped frames |
 | `frames_malformed` | Header-invalid subset of dropped frames |
 
-Use `TKEEP=8'hff` on all non-final beats. The final beat must contain valid bytes from bit 0 upward. The first 14 bytes must be present.
-
-No frequency, area, bandwidth, or power claim is made without implementation results.
+**Frame format:** `TKEEP=8'hff` on non-final beats; contiguous valid bytes from lane zero on TLAST; minimum 14-byte Ethernet II header.

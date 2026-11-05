@@ -17,9 +17,9 @@ One clock domain; an input frame is stored into a finite beat memory. The first 
 
 The output remains stable while `m_axis_tvalid=1` and `m_axis_tready=0`. Input is backpressured during both LOAD and FORWARD. Storage and replay use one synchronous write port and one synchronous read port per buffer.
 
-## Limitations
+## Integration profile
 
-- This revision handles untagged Ethernet II headers only; VLAN EtherType interpretation requires an extension.
+- The parser recognizes untagged Ethernet II headers with destination MAC and EtherType fields.
 - One full frame is buffered at a time. Throughput depends on capture and replay cycles.
-- Configuration is a direct control port, not an AXI-Lite slave.
-- Only basic first-14-byte structural validation is performed.
+- Configuration enters through dedicated rule-control ports.
+- Frame-header validation checks the first 14 Ethernet II bytes.
