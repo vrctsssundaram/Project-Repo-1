@@ -1,4 +1,4 @@
-# StreamGuard-L2
+# Layer 2 Ethernet frame filter
 
 Bounded 64-bit AXI4-Stream Ethernet Layer-2 store-and-forward rule filter.
 
